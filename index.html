@@ -35,8 +35,8 @@
     display:grid; gap:16px;
     grid-template-columns: 1fr;
   }
-  
-  }
+  /* (Se eliminó una llave extra que rompía CSS) */
+
   .card{background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:16px; box-shadow:0 2px 8px #00000008;}
   .card-form{background:linear-gradient(to bottom, #fafbff, #ffffff); box-shadow:0 4px 16px #00000010;}
   .card h2{margin:0 0 8px 0; font-size:1.1rem}
@@ -52,7 +52,10 @@
   .hint{font-size:.8rem; color:var(--muted)}
   .toolbar, .toolbar-right{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
   .toolbar-right{justify-content:flex-end}
-  .btn{border:1px solid var(--border); padding:10px 14px; background:#ffffff; color:var(--text); border-radius:9999px; cursor:pointer; font-weight:600; font-size:.95rem;}
+  .btn-toggle{display:inline-flex; align-items:center; gap:6px;}
+  .btn-toggle .chev{display:inline-block; transition:transform .18s ease;}
+  .btn-toggle[aria-expanded="false"] .chev{transform:rotate(-90deg);}  
+  .btn{border:1px solid var(--border); padding:10px 14px; background:#ffffff; color:#000; border-radius:9999px; cursor:pointer; font-weight:600; font-size:.95rem;}
   .btn:hover{filter:brightness(1.08)}
   .btn-primary{background:var(--primary); color:#fff; border-color:transparent}
   .btn-primary:hover{background:var(--primary-2); filter:brightness(0.98)}
@@ -77,17 +80,17 @@
   .table th{color:var(--muted); font-weight:600}
   .input-inline{display:flex; gap:6px; align-items:center}
   .chip{border:1px dashed var(--border); border-radius:9999px; padding:6px 10px; font-size:.85rem; color:#6b7280; background:#fff;}
-  .kbd{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; border:1px solid var(--border); background:#0b1220; padding:0 .35rem; border-radius:6px}
+  .kbd{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace; border:1px solid var(--border); background:#0b1220; padding:0 .35rem; border-radius:6px}
   .nowrap{white-space:nowrap}
-.avatar{width:28px;height:28px;border-radius:9999px; display:inline-flex; align-items:center; justify-content:center; font-weight:700; font-size:.8rem; margin-right:6px; color:#111827;}
-.stack{display:grid;gap:10px}
-.rail-row{display:grid;grid-template-columns:44px 1fr;align-items:center;gap:10px}
-.rail{width:44px;display:flex;justify-content:center}
-.rail .ico{width:28px;height:28px;border-radius:9999px;background:#e5e7eb;display:flex;align-items:center;justify-content:center;color:#6b7280;font-weight:700}
-.field{display:flex;gap:10px;flex-wrap:wrap}
-.field > *{flex:1 1 220px}
-@media (max-width:560px){.field{flex-direction:column}}
-.desc{white-space:pre-wrap}
+  .avatar{width:28px;height:28px;border-radius:9999px; display:inline-flex; align-items:center; justify-content:center; font-weight:700; font-size:.8rem; margin-right:6px; color:#111827;}
+  .stack{display:grid;gap:10px}
+  .rail-row{display:grid;grid-template-columns:44px 1fr;align-items:center;gap:10px}
+  .rail{width:44px;display:flex;justify-content:center}
+  .rail .ico{width:28px;height:28px;border-radius:9999px;background:#e5e7eb;display:flex;align-items:center;justify-content:center;color:#6b7280;font-weight:700}
+  .field{display:flex;gap:10px;flex-wrap:wrap}
+  .field > *{flex:1 1 220px}
+  @media (max-width:560px){.field{flex-direction:column}}
+  .desc{white-space:pre-wrap}
 </style>
 </head>
 <body>
@@ -107,7 +110,12 @@
             <div class="field">
               <div style="flex:1 1 160px">
                 <label for="member" class="sr-only">Miembro</label>
-                <input id="member" name="member" type="text" maxlength="60" placeholder="Miembro (opcional)" />
+                <select id="member" name="member" aria-label="Miembro">
+                  <option value="">—</option>
+                  <option value="Isma">Isma</option>
+                  <option value="Nadia">Nadia</option>
+                  <option value="Ra">Ra</option>
+                </select>
               </div>
             </div>
           </div>
@@ -128,6 +136,21 @@
               <div style="flex:1 1 180px">
                 <label for="date" class="sr-only">Fecha</label>
                 <input id="date" name="date" type="date" required aria-required="true" />
+              </div>
+            </div>
+          </div>
+
+          <div class="rail-row">
+            <div class="rail"><span class="ico">🔁</span></div>
+            <div class="field">
+              <div style="flex:1 1 200px">
+                <label for="periodicity">Periodicidad</label>
+                <select id="periodicity" name="periodicity" aria-label="Periodicidad">
+                  <option value="Diaria">Diaria</option>
+                  <option value="Semanal">Semanal</option>
+                  <option value="Mensual">Mensual</option>
+                  <option value="Puntual">Puntual</option>
+                </select>
               </div>
             </div>
           </div>
@@ -181,33 +204,42 @@
       </form>
     </section>
 
-    <!-- ====== Columna derecha: filtros + lista ====== -->
+    <!-- ====== Columna derecha: tarjeta de tareas ====== -->
     <section class="card" aria-labelledby="list-title">
       <div style="display:flex; gap:8px; justify-content:space-between; align-items:flex-start; flex-wrap:wrap">
-        <h2 id="list-title" style="margin:0">Tareas</h2>
+        <div style="display:flex; align-items:center; gap:8px">
+          <h2 id="list-title" style="margin:0">Tareas</h2>
+          <button class="btn btn-toggle" id="toggleListBtn" aria-expanded="true" aria-controls="collapsibleArea" title="Mostrar/Ocultar lista">
+            <span class="chev">▼</span><span class="sr-only">Alternar lista</span>
+          </button>
+        </div>
         <div class="toolbar-right">
           <button class="btn" id="exportJSONBtn">⬇️ Exportar JSON</button>
           <button class="btn" id="exportCSVBtn" title="Opcional">📄 Exportar CSV</button>
         </div>
       </div>
 
-      <!-- Filtros -->
-      <div class="row" role="region" aria-label="Filtros">
-        <div>
-          <label for="filterDate">📅 Fecha</label>
-          <input id="filterDate" type="date" />
-        </div>
-      </div>
-
+      <!-- Totales SIEMPRE visibles -->
       <div class="totals" id="totals">
         <span class="badge">Total tareas: <strong id="totalCount">0</strong></span>
         <span class="badge">Minutos acumulados: <strong id="totalMinutes">0</strong></span>
       </div>
 
-      <div class="divider"></div>
+      <!-- Zona colapsable: filtros + lista -->
+      <div id="collapsibleArea">
+        <!-- Filtros -->
+        <div class="row" role="region" aria-label="Filtros">
+          <div>
+            <label for="filterDate">📅 Fecha</label>
+            <input id="filterDate" type="date" />
+          </div>
+        </div>
 
-      <div class="list" id="taskList" role="list" aria-live="polite" aria-atomic="false"></div>
-      <div id="emptyState" class="muted">No hay tareas para los filtros seleccionados.</div>
+        <div class="divider"></div>
+
+        <div class="list" id="taskList" role="list" aria-live="polite" aria-atomic="false"></div>
+        <div id="emptyState" class="muted">No hay tareas para los filtros seleccionados.</div>
+      </div>
     </section>
   </div>
 
@@ -305,7 +337,7 @@ const storage = (() => {
 /* =========================================================================================
    EXPORTACIÓN / IMPORTACIÓN (JSON y CSV)
    ======================================================================================= */
-io = (() => {
+const io = (() => {
   function download(filename, content, mime='application/json'){
     const blob = new Blob([content], {type:mime});
     const url = URL.createObjectURL(blob);
@@ -322,12 +354,12 @@ io = (() => {
   function exportCSV(){
     const all = storage.getAll();
     const headers = [
-      'id','dateISO','member','title','description','category',
+      'id','dateISO','member','title','description','category','periodicity',
       'minutes','notes','startedAtISO','endedAtISO',
       'completed','createdAtISO','updatedAtISO'
     ];
     const esc = v => {
-      const s = (v ?? '').toString().replace(/"/g,'""');
+      const s = (v ?? '').toString().replace(/\"/g,'\"\"');
       return `"${s}"`;
     };
     const rows = [headers.join(',')].concat(all.map(t =>
@@ -428,6 +460,8 @@ const ui = (() => {
     document.getElementById('member').value = task.member || '';
     document.getElementById('title').value = task.title || '';
     document.getElementById('description').value = task.description || '';
+    const perEl = document.getElementById('periodicity');
+    if(perEl && task.periodicity){ perEl.value = task.periodicity; }
     document.getElementById('minutes').value = task.minutes ?? 0;
     document.getElementById('notes').value = task.notes || '';
     document.getElementById('editingId').value = task.id;
@@ -479,7 +513,7 @@ const ui = (() => {
       const actions = document.createElement('div');
       actions.className = 'actions';
       const btnEdit = button('✏️ Editar', ()=> { ui.fillForm(t); });
-      const btnDelete = button('🗑️ Eliminar', ()=> removeTask(t.id), 'btn-danger');
+      const btnDelete = button('🗑️ Eliminar', ()=> app.removeTask(t.id), 'btn-danger');
       actions.append(btnEdit, btnDelete);
 
       header.append(left, actions);
@@ -512,9 +546,10 @@ const ui = (() => {
    APLICACIÓN: filtrado, eventos y lógica principal
    ======================================================================================= */
 const app = (() => {
-  // Estado de filtros:
+  // Estado de filtros y UI:
   const state = {
     filterDate: utils.todayISO(),
+    listCollapsed: false,
   };
 
   // ========== Inicialización ==========
@@ -523,6 +558,10 @@ const app = (() => {
     document.getElementById('date').value = utils.todayISO();
     document.getElementById('filterDate').value = state.filterDate;
 
+    // Leer estado colapsado guardado
+    try{ state.listCollapsed = JSON.parse(localStorage.getItem('tasks_collapsed')||'false'); }catch{ state.listCollapsed = false; }
+    setCollapsed(state.listCollapsed);
+
     // Eventos formulario
     document.getElementById('taskForm').addEventListener('submit', onSave);
     document.getElementById('resetBtn').addEventListener('click', (e)=> { e.preventDefault(); ui.clearForm(); });
@@ -530,6 +569,9 @@ const app = (() => {
 
     // Filtros
     document.getElementById('filterDate').addEventListener('change', (e)=>{ state.filterDate = e.target.value; refreshList(); });
+
+    // Toggle lista (se corrigió paréntesis extra)
+    document.getElementById('toggleListBtn').addEventListener('click', ()=>{ setCollapsed(!state.listCollapsed); });
         
     // Acciones de barra
     document.getElementById('exportJSONBtn').addEventListener('click', io.exportJSON);
@@ -537,7 +579,7 @@ const app = (() => {
             
     // Atajos teclado
     document.addEventListener('keydown', (e)=>{
-            if(e.key.toLowerCase() === 'n' && !e.ctrlKey && !e.metaKey){
+      if(e.key.toLowerCase() === 'n' && !e.ctrlKey && !e.metaKey){
         if(document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA'){
           e.preventDefault(); ui.clearForm();
         }
@@ -551,6 +593,10 @@ const app = (() => {
         if(isEditing) return; // no robar el foco si estás escribiendo
         e.preventDefault();
         document.getElementById('filterDate').focus();
+      }
+      if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'l'){
+        // Ctrl+L: alternar lista
+        e.preventDefault(); setCollapsed(!state.listCollapsed);
       }
     });
 
@@ -586,7 +632,8 @@ const app = (() => {
       member: document.getElementById('member').value.trim(),
       title,
       description: document.getElementById('description').value.trim(),
-            minutes,
+      periodicity: document.getElementById('periodicity').value,
+      minutes,
       notes: document.getElementById('notes').value.trim(),
       category: null,
       startedAtISO: document.getElementById('startedAtISO').value || null,
@@ -598,4 +645,151 @@ const app = (() => {
     // Si ya existía, conservar createdAtISO previo
     const all = storage.getAll();
     const prev = all.find(t => t.id === id);
-    if(prev
+    if(prev){ task.createdAtISO = prev.createdAtISO || nowISO; }
+
+    storage.upsert(task);
+    ui.toast(prev ? 'Tarea actualizada' : 'Tarea creada');
+    ui.clearForm();
+    refreshList();
+  }
+
+  // ========== Eliminar ==========
+  function removeTask(id){
+    const ok = confirm('¿Eliminar esta tarea? Esta acción no se puede deshacer.');
+    if(!ok) return;
+    storage.remove(id);
+    ui.toast('Tarea eliminada');
+    refreshList();
+  }
+
+  // ========== Listado y filtros ==========
+  function getFiltered(){
+    const all = storage.getAll();
+    const d = state.filterDate;
+    return all.filter(t => !d || t.dateISO === d);
+  }
+  function refreshList(){
+    ui.renderList(getFiltered());
+  }
+
+  function setCollapsed(flag){
+    state.listCollapsed = !!flag;
+    const area = document.getElementById('collapsibleArea');
+    const btn = document.getElementById('toggleListBtn');
+    if(area){ area.style.display = state.listCollapsed ? 'none' : ''; }
+    if(btn){
+      btn.setAttribute('aria-expanded', String(!state.listCollapsed));
+      const chev = btn.querySelector('.chev');
+      if(chev) chev.textContent = state.listCollapsed ? '▶' : '▼';
+      btn.title = state.listCollapsed ? 'Mostrar lista (Ctrl+L)' : 'Ocultar lista (Ctrl+L)';
+    }
+    try{ localStorage.setItem('tasks_collapsed', JSON.stringify(state.listCollapsed)); }catch{}
+  }
+
+  return { init, refreshList, removeTask };
+})();
+
+// Iniciar app
+window.addEventListener('DOMContentLoaded', app.init);
+
+/* =========================================================================================
+   PRUEBAS RÁPIDAS (no destructivas)
+   ======================================================================================= */
+function runSelfTests(){
+  const results = [];
+  const ok = (name, pass, extra='') => results.push({name, pass, extra});
+  try{
+    // 1) Toggle existe y cambia aria-expanded
+    const btn = document.getElementById('toggleListBtn');
+    const before = btn.getAttribute('aria-expanded');
+    btn.click();
+    const after = btn.getAttribute('aria-expanded');
+    ok('Toggle colapsable cambia aria-expanded', before !== after);
+    // restaurar
+    btn.click();
+    
+    // 2) Select de miembro tiene opciones esperadas
+    const member = document.getElementById('member');
+    const vals = Array.from(member.options).map(o=>o.value);
+    ok('Select miembro contiene Isma/Nadia/Ra', ['Isma','Nadia','Ra'].every(v=>vals.includes(v)));
+
+    // 3) Totales están fuera de la zona colapsable
+    const totalsInside = document.getElementById('collapsibleArea').contains(document.getElementById('totals'));
+    ok('Totales fuera del colapsable', totalsInside === false);
+
+    // 4) Render de totales con datos de prueba (preserva datos)
+    const backup = storage.getAll();
+    const today = utils.todayISO();
+    const sample = [
+      {id:'t1', dateISO: today, member:'Isma', title:'Tarea A', description:'', minutes:10, notes:'', category:null, startedAtISO:null, endedAtISO:null, completed:false, createdAtISO: new Date().toISOString(), updatedAtISO: new Date().toISOString()},
+      {id:'t2', dateISO: today, member:'Nadia', title:'Tarea B', description:'', minutes:20, notes:'', category:null, startedAtISO:null, endedAtISO:null, completed:false, createdAtISO: new Date().toISOString(), updatedAtISO: new Date().toISOString()},
+    ];
+    storage.saveAll(sample);
+    app.refreshList();
+    const countOk = document.getElementById('totalCount').textContent === '2';
+    const minsOk = document.getElementById('totalMinutes').textContent === '30';
+    ok('Totales se calculan (2 tareas / 30 min)', countOk && minsOk);
+    // restaurar
+    storage.saveAll(backup);
+    app.refreshList();
+  }catch(err){
+    ok('SelfTests lanzaron error', false, String(err));
+  }
+  console.log('[SelfTests]', results);
+}
+
+window.addEventListener('DOMContentLoaded', ()=>{
+  // Ejecutar tras init
+  requestAnimationFrame(runSelfTests);
+});
+// ============================
+// Auto-viñetas (bullets)
+// ============================
+(function(){
+  function setupAutoBullets(textarea){
+    if(!textarea) return;
+    textarea.addEventListener('keydown', function(e){
+      if(e.key !== 'Enter') return;
+      const el = e.target;
+      const val = el.value;
+      const start = el.selectionStart;
+      const end = el.selectionEnd;
+      const lineStart = val.lastIndexOf('\n', start - 1) + 1;
+      const line = val.slice(lineStart, start);
+      const m = line.match(/^(\s*)([-*•]|(\d+)\.)\s+(.*)$/);
+      if(!m) return; // no es una línea de lista
+      e.preventDefault();
+      const indent = m[1] || '';
+      const isNumber = !!m[3];
+      const bullet = m[2];
+      const rest = m[4] || '';
+      const before = val.slice(0, start);
+      const after  = val.slice(end);
+      if(rest.trim() === ''){
+        const insert = '\n';
+        el.value = before + insert + after;
+        const pos = start + insert.length;
+        el.setSelectionRange(pos, pos);
+        return;
+      }
+      let nextPrefix;
+      if(isNumber){
+        const n = parseInt(m[3], 10) || 1;
+        nextPrefix = `${indent}${n+1}. `;
+      } else {
+        nextPrefix = `${indent}${bullet} `;
+      }
+      const insert = '\n' + nextPrefix;
+      el.value = before + insert + after;
+      const pos = start + insert.length;
+      el.setSelectionRange(pos, pos);
+    });
+  }
+  window.addEventListener('DOMContentLoaded', function(){
+    setupAutoBullets(document.getElementById('description'));
+  });
+})();
+
+</script>
+</body>
+</html>
