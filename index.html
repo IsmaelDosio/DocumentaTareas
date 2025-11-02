@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Documentar Tareas Diarias</title>
+<style>
+  /* ====== Estilos base (sin dependencias externas) ====== */
+  :root{
+    --bg:#eef2f7;          /* fondo claro */
+    --panel:#ffffff;        /* panel blanco */
+    --muted:#6b7280;        /* texto secundario */
+    --text:#0f172a;         /* texto principal */
+    --primary:#2563eb;      /* azul */
+    --primary-2:#1d4ed8;    /* azul oscuro */
+    --danger:#ef4444;       /* rojo */
+    --info:#0ea5e9;         /* cian */
+    --card:#ffffff;         /* inputs */
+    --border:#e5e7eb;       /* bordes claros */
+    --focus:#60a5fa;        /* foco azul claro */
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Noto Sans", "Helvetica Neue", Arial, "Apple Color Emoji","Segoe UI Emoji";
+    background:linear-gradient(180deg,#f6f8fb, var(--bg));
+    color:var(--text);
+  }
+  a{color:var(--info)}
+  .container{max-width:920px; margin:0 auto; padding:16px; display:grid; gap:16px}
+  header{display:flex; flex-direction:column; gap:6px; padding:12px 16px; background:transparent; border:0; border-radius:12px;}
+  header h1{margin:0; font-size:1.35rem}
+  header p{margin:0; color:var(--muted); font-size:.95rem}
+  .grid{
+    display:grid; gap:16px;
+    grid-template-columns: 1fr;
+  }
+  
+  }
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:16px; box-shadow:0 2px 8px #00000008;}
+  .card-form{background:linear-gradient(to bottom, #fafbff, #ffffff); box-shadow:0 4px 16px #00000010;}
+  .card h2{margin:0 0 8px 0; font-size:1.1rem}
+  .row{display:grid; grid-template-columns:1fr; gap:10px; margin-bottom:10px}
+  @media (min-width: 560px){
+    .row.cols-2{grid-template-columns:1fr 1fr}
+    .row.cols-3{grid-template-columns:1fr 1fr 1fr}
+  }
+  label{display:block; font-size:.9rem; color:var(--muted); margin-bottom:4px}
+  input[type="text"], input[type="number"], input[type="date"], textarea, select{width:100%; padding:12px 14px; border-radius:9999px; background:var(--card); border:1px solid var(--border); color:var(--text); outline:none;}
+  textarea{min-height:84px; resize:vertical; border-radius:16px}
+  input:focus, textarea:focus, select:focus{border-color:var(--focus); box-shadow:0 0 0 3px #38bdf833}
+  .hint{font-size:.8rem; color:var(--muted)}
+  .toolbar, .toolbar-right{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+  .toolbar-right{justify-content:flex-end}
+  .btn{border:1px solid var(--border); padding:10px 14px; background:#ffffff; color:var(--text); border-radius:9999px; cursor:pointer; font-weight:600; font-size:.95rem;}
+  .btn:hover{filter:brightness(1.08)}
+  .btn-primary{background:var(--primary); color:#fff; border-color:transparent}
+  .btn-primary:hover{background:var(--primary-2); filter:brightness(0.98)}
+  .btn-danger{background:#fff1f2; border-color:#fecdd3; color:#b91c1c}
+  .btn-ghost{background:transparent}
+  .badge{display:inline-block; padding:.2rem .6rem; border-radius:9999px; font-size:.75rem; border:1px solid var(--border); color:#374151; background:#ffffff;}
+  .list{display:grid; gap:10px}
+  .item{border:1px solid var(--border); border-radius:16px; background:#ffffff; padding:12px; display:grid; gap:8px; box-shadow:0 1px 4px #0000000a;}
+  .item-header{display:flex; align-items:center; gap:8px; justify-content:space-between}
+  .item-title{margin:0; font-size:1rem}
+  .muted{color:var(--muted)}
+  .actions{display:flex; gap:6px; flex-wrap:wrap}
+  .pill{padding:.18rem .5rem; border-radius:999px; border:1px solid var(--border); font-size:.75rem}
+  .completed .item-title{text-decoration: line-through; opacity:.8}
+  .totals{display:flex; flex-wrap:wrap; gap:8px; align-items:center; font-size:.95rem}
+  .totals strong{color:#111827}
+  .toast{position:fixed; right:16px; bottom:16px; background:#111827; color:#fff; padding:10px 12px; border-radius:12px; border:0; box-shadow:0 6px 20px #0003;}
+  .sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0}
+  .divider{height:1px; background:var(--border); margin:8px 0}
+  .table{width:100%; border-collapse:collapse}
+  .table th, .table td{padding:8px; border-bottom:1px solid var(--border); text-align:left; vertical-align:top}
+  .table th{color:var(--muted); font-weight:600}
+  .input-inline{display:flex; gap:6px; align-items:center}
+  .chip{border:1px dashed var(--border); border-radius:9999px; padding:6px 10px; font-size:.85rem; color:#6b7280; background:#fff;}
+  .kbd{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; border:1px solid var(--border); background:#0b1220; padding:0 .35rem; border-radius:6px}
+  .nowrap{white-space:nowrap}
+.avatar{width:28px;height:28px;border-radius:9999px; display:inline-flex; align-items:center; justify-content:center; font-weight:700; font-size:.8rem; margin-right:6px; color:#111827;}
+.stack{display:grid;gap:10px}
+.rail-row{display:grid;grid-template-columns:44px 1fr;align-items:center;gap:10px}
+.rail{width:44px;display:flex;justify-content:center}
+.rail .ico{width:28px;height:28px;border-radius:9999px;background:#e5e7eb;display:flex;align-items:center;justify-content:center;color:#6b7280;font-weight:700}
+.field{display:flex;gap:10px;flex-wrap:wrap}
+.field > *{flex:1 1 220px}
+@media (max-width:560px){.field{flex-direction:column}}
+.desc{white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Documentar Tareas Diarias</h1>
+  </header>
+
+  <div class="grid" role="main">
+    <!-- ====== Columna izquierda: formulario ====== -->
+    <section class="card card-form" aria-labelledby="form-title">
+      <h2 id="form-title">Nueva tarea</h2>
+      <form id="taskForm" novalidate>
+        <div class="stack">
+          <div class="rail-row">
+            <div class="rail"><span class="ico">👤</span></div>
+            <div class="field">
+              <div style="flex:1 1 160px">
+                <label for="member" class="sr-only">Miembro</label>
+                <input id="member" name="member" type="text" maxlength="60" placeholder="Miembro (opcional)" />
+              </div>
+            </div>
+          </div>
+
+          <div class="rail-row">
+            <div class="rail"><span class="ico">✅</span></div>
+            <div class="field">
+              <div style="flex:1 1 260px">
+                <label for="title" class="sr-only">Título / Tarea</label>
+                <input id="title" name="title" type="text" placeholder="Título / Tarea" required aria-required="true" />
+              </div>
+            </div>
+          </div>
+
+          <div class="rail-row">
+            <div class="rail"><span class="ico">📅</span></div>
+            <div class="field">
+              <div style="flex:1 1 180px">
+                <label for="date" class="sr-only">Fecha</label>
+                <input id="date" name="date" type="date" required aria-required="true" />
+              </div>
+            </div>
+          </div>
+
+          <div class="rail-row">
+            <div class="rail"><span class="ico">📝</span></div>
+            <div class="field">
+              <div style="flex:1 1 320px">
+                <label for="description" class="sr-only">Descripción detallada</label>
+                <textarea id="description" name="description" placeholder="Descripción detallada"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="rail-row">
+            <div class="rail"><span class="ico">🕒</span></div>
+            <div class="field">
+              <div style="flex:1 1 160px">
+                <label for="minutes" class="sr-only">Tiempo empleado (minutos)</label>
+                <input id="minutes" name="minutes" type="number" inputmode="numeric" min="0" step="1" value="0" placeholder="Minutos" />
+              </div>
+              <div class="input-inline" role="group" aria-label="Temporizador" style="flex:0 0 auto">
+                <button type="button" class="btn" id="timerBtn" aria-pressed="false" title="Iniciar/Detener">⏱️</button>
+                <span id="timerDisplay" class="chip" aria-live="polite" aria-atomic="true">00:00:00</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="rail-row">
+            <div class="rail"><span class="ico">🗒️</span></div>
+            <div class="field">
+              <div style="flex:1 1 240px">
+                <label for="notes" class="sr-only">Notas</label>
+                <input id="notes" name="notes" type="text" placeholder="Notas (opcional)" />
+              </div>
+            </div>
+          </div>
+
+          <div class="rail-row">
+            <div class="rail"></div>
+            <div class="toolbar">
+              <button type="submit" class="btn btn-primary" id="saveBtn">💾 Guardar</button>
+              <button type="button" class="btn" id="resetBtn">🧹 Limpiar</button>
+              <span class="chip" id="editModeChip" hidden>✏️ Editando</span>
+            </div>
+          </div>
+        </div>
+        <input type="hidden" id="editingId" />
+        <input type="hidden" id="startedAtISO" />
+        <input type="hidden" id="endedAtISO" />
+      </form>
+    </section>
+
+    <!-- ====== Columna derecha: filtros + lista ====== -->
+    <section class="card" aria-labelledby="list-title">
+      <div style="display:flex; gap:8px; justify-content:space-between; align-items:flex-start; flex-wrap:wrap">
+        <h2 id="list-title" style="margin:0">Tareas</h2>
+        <div class="toolbar-right">
+          <button class="btn" id="exportJSONBtn">⬇️ Exportar JSON</button>
+          <button class="btn" id="exportCSVBtn" title="Opcional">📄 Exportar CSV</button>
+        </div>
+      </div>
+
+      <!-- Filtros -->
+      <div class="row" role="region" aria-label="Filtros">
+        <div>
+          <label for="filterDate">📅 Fecha</label>
+          <input id="filterDate" type="date" />
+        </div>
+      </div>
+
+      <div class="totals" id="totals">
+        <span class="badge">Total tareas: <strong id="totalCount">0</strong></span>
+        <span class="badge">Minutos acumulados: <strong id="totalMinutes">0</strong></span>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="list" id="taskList" role="list" aria-live="polite" aria-atomic="false"></div>
+      <div id="emptyState" class="muted">No hay tareas para los filtros seleccionados.</div>
+    </section>
+  </div>
+
+  <!-- Toast accesible -->
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</div>
+
+<!-- ====== Código JavaScript (modular por secciones) ====== -->
+<script>
+/* =========================================================================================
+   UTILIDADES: fechas, ids, formatos
+   ======================================================================================= */
+const utils = (() => {
+  const pad = n => String(n).padStart(2, '0');
+
+  function todayISO(){
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = pad(d.getMonth()+1);
+    const da = pad(d.getDate());
+    return `${y}-${m}-${da}`;
+  }
+  function toHMS(seconds){
+    const h = Math.floor(seconds/3600);
+    const m = Math.floor((seconds%3600)/60);
+    const s = Math.floor(seconds%60);
+    return `${pad(h)}:${pad(m)}:${pad(s)}`;
+  }
+  function minutesBetween(isoStart, isoEnd){
+    if(!isoStart || !isoEnd) return 0;
+    const a = new Date(isoStart).getTime();
+    const b = new Date(isoEnd).getTime();
+    if (isNaN(a) || isNaN(b) || b < a) return 0;
+    return Math.round((b - a) / 60000);
+  }
+  function uuid(){
+    // Suficiente para clave local (no cripto)
+    return 'id-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+  }
+  return { todayISO, toHMS, minutesBetween, uuid };
+})();
+
+/* =========================================================================================
+   ALMACENAMIENTO: localStorage CRUD
+   Estructura de cada registro (JSON):
+   {
+     id, dateISO, member, title, description, category,
+     minutes, notes, startedAtISO, endedAtISO,
+     completed (bool), createdAtISO, updatedAtISO
+   }
+   ======================================================================================= */
+const storage = (() => {
+  const KEY = 'tasks_v1';
+
+  function getAll(){
+    try{
+      const raw = localStorage.getItem(KEY);
+      const arr = raw ? JSON.parse(raw) : [];
+      if(!Array.isArray(arr)) return [];
+      return arr;
+    }catch(e){
+      console.error('Error al leer localStorage', e);
+      return [];
+    }
+  }
+  function saveAll(list){
+    localStorage.setItem(KEY, JSON.stringify(list));
+  }
+  function upsert(task){
+    const list = getAll();
+    const idx = list.findIndex(t => t.id === task.id);
+    if(idx >= 0){ list[idx] = task; } else { list.push(task); }
+    saveAll(list);
+  }
+  function remove(id){
+    const list = getAll().filter(t => t.id !== id);
+    saveAll(list);
+  }
+  function mergeFromExternal(externals){
+    const current = getAll();
+    const byId = new Map(current.map(t => [t.id, t]));
+    let added = 0, skipped = 0;
+    for(const t of externals){
+      if(!t || !t.id) continue;
+      if(byId.has(t.id)){ skipped++; continue; }
+      byId.set(t.id, t);
+      added++;
+    }
+    saveAll([...byId.values()]);
+    return {added, skipped, total: byId.size};
+  }
+  return { getAll, saveAll, upsert, remove, mergeFromExternal, KEY };
+})();
+
+/* =========================================================================================
+   EXPORTACIÓN / IMPORTACIÓN (JSON y CSV)
+   ======================================================================================= */
+io = (() => {
+  function download(filename, content, mime='application/json'){
+    const blob = new Blob([content], {type:mime});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 0);
+  }
+  function exportJSON(){
+    const all = storage.getAll();
+    download(`tareas-${utils.todayISO()}.json`, JSON.stringify(all, null, 2));
+    ui.toast('Exportado JSON con ' + all.length + ' tareas.');
+  }
+  function exportCSV(){
+    const all = storage.getAll();
+    const headers = [
+      'id','dateISO','member','title','description','category',
+      'minutes','notes','startedAtISO','endedAtISO',
+      'completed','createdAtISO','updatedAtISO'
+    ];
+    const esc = v => {
+      const s = (v ?? '').toString().replace(/"/g,'""');
+      return `"${s}"`;
+    };
+    const rows = [headers.join(',')].concat(all.map(t =>
+      headers.map(h => esc(t[h])).join(',')
+    ));
+    download(`tareas-${utils.todayISO()}.csv`, rows.join('\n'), 'text/csv');
+    ui.toast('Exportado CSV.');
+  }
+  async function importJSONFromFile(file){
+    const text = await file.text();
+    let data;
+    try { data = JSON.parse(text); }
+    catch(e){ ui.toast('Archivo no es JSON válido.'); return; }
+    if(!Array.isArray(data)){ ui.toast('El JSON debe ser una lista de tareas.'); return; }
+    const {added, skipped, total} = storage.mergeFromExternal(data);
+    ui.toast(`Importadas ${added}, omitidas ${skipped}. Total ahora: ${total}.`);
+    app.refreshList();
+  }
+  return { exportJSON, exportCSV, importJSONFromFile };
+})();
+
+/* =========================================================================================
+   TEMPORIZADOR (para el formulario actual)
+   - Inicia/Detiene y vuelca minutos en el campo "minutes".
+   - Guarda startedAtISO/endedAtISO ocultos del formulario.
+   ======================================================================================= */
+const timer = (() => {
+  let running = false;
+  let startedAt = null;
+  let raf = null;
+
+  function start(){
+    if(running) return;
+    running = true;
+    startedAt = new Date();
+    document.getElementById('startedAtISO').value = startedAt.toISOString();
+    document.getElementById('timerBtn').textContent = '⏸️ Detener temporizador';
+    document.getElementById('timerBtn').setAttribute('aria-pressed','true');
+    tick();
+  }
+  function stop(){
+    if(!running) return;
+    running = false;
+    const endedAt = new Date();
+    document.getElementById('endedAtISO').value = endedAt.toISOString();
+    document.getElementById('timerBtn').textContent = '⏱️ Iniciar temporizador';
+    document.getElementById('timerBtn').setAttribute('aria-pressed','false');
+    if(raf) cancelAnimationFrame(raf);
+    // Calcular minutos y sumar al campo
+    const mins = utils.minutesBetween(startedAt.toISOString(), endedAt.toISOString());
+    const minField = document.getElementById('minutes');
+    const current = parseInt(minField.value || '0', 10) || 0;
+    minField.value = Math.max(0, current + mins);
+    ui.toast(`Temporalizado +${mins} min (total formulario: ${minField.value} min)`);
+  }
+  function resetDisplay(){
+    document.getElementById('timerDisplay').textContent = '00:00:00';
+    document.getElementById('startedAtISO').value = '';
+    document.getElementById('endedAtISO').value = '';
+  }
+  function tick(){
+    if(!running){ return; }
+    const seconds = Math.floor((Date.now() - startedAt.getTime())/1000);
+    document.getElementById('timerDisplay').textContent = utils.toHMS(seconds);
+    raf = requestAnimationFrame(tick);
+  }
+  function toggle(){ running ? stop() : start(); }
+  function cancelIfRunning(){
+    if(running) stop();
+  }
+  return { start, stop, toggle, resetDisplay, cancelIfRunning };
+})();
+
+/* =========================================================================================
+   UI: renderizado, eventos, atajos, toasts
+   ======================================================================================= */
+const ui = (() => {
+  function toast(msg){
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.hidden = false;
+    clearTimeout(el._t);
+    el._t = setTimeout(()=>{ el.hidden = true; }, 2600);
+  }
+  function clearForm(){
+    document.getElementById('taskForm').reset();
+    document.getElementById('date').value = utils.todayISO();
+    document.getElementById('minutes').value = 0;
+    document.getElementById('editingId').value = '';
+    document.getElementById('startedAtISO').value = '';
+    document.getElementById('endedAtISO').value = '';
+    document.getElementById('editModeChip').hidden = true;
+    timer.resetDisplay();
+    document.getElementById('title').focus();
+  }
+  function fillForm(task){
+    document.getElementById('date').value = task.dateISO || utils.todayISO();
+    document.getElementById('member').value = task.member || '';
+    document.getElementById('title').value = task.title || '';
+    document.getElementById('description').value = task.description || '';
+    document.getElementById('minutes').value = task.minutes ?? 0;
+    document.getElementById('notes').value = task.notes || '';
+    document.getElementById('editingId').value = task.id;
+    document.getElementById('startedAtISO').value = task.startedAtISO || '';
+    document.getElementById('endedAtISO').value = task.endedAtISO || '';
+    document.getElementById('editModeChip').hidden = false;
+    document.getElementById('title').focus();
+    timer.resetDisplay();
+  }
+  function renderList(tasks){
+    const listEl = document.getElementById('taskList');
+    const emptyEl = document.getElementById('emptyState');
+    listEl.innerHTML = '';
+    if(tasks.length === 0){
+      emptyEl.style.display = 'block';
+      document.getElementById('totalCount').textContent = '0';
+      document.getElementById('totalMinutes').textContent = '0';
+      return;
+    }
+    emptyEl.style.display = 'none';
+
+    // Totales
+    const totalMinutes = tasks.reduce((acc,t)=> acc + (parseInt(t.minutes,10)||0), 0);
+    document.getElementById('totalCount').textContent = tasks.length;
+    document.getElementById('totalMinutes').textContent = totalMinutes;
+
+    for(const t of tasks){
+      const item = document.createElement('div');
+      item.className = 'item' + (t.completed ? ' completed' : '');
+      item.setAttribute('role','listitem');
+
+      const header = document.createElement('div');
+      header.className = 'item-header';
+
+      const left = document.createElement('div');
+      const title = document.createElement('h3');
+      title.className = 'item-title';
+      title.textContent = t.title || '(sin título)';
+      const meta = document.createElement('div');
+      meta.className = 'muted';
+      meta.innerHTML = `
+        <span class="pill nowrap">${t.dateISO}</span>
+        <span class="pill">${(t.member||'—')}</span>
+        <span class="pill">${(t.minutes||0)} min</span>
+      `;
+      left.appendChild(title);
+      left.appendChild(meta);
+
+      const actions = document.createElement('div');
+      actions.className = 'actions';
+      const btnEdit = button('✏️ Editar', ()=> { ui.fillForm(t); });
+      const btnDelete = button('🗑️ Eliminar', ()=> removeTask(t.id), 'btn-danger');
+      actions.append(btnEdit, btnDelete);
+
+      header.append(left, actions);
+
+      const body = document.createElement('div');
+      const descDiv = document.createElement('div');
+      descDiv.className = 'muted desc';
+      descDiv.textContent = t.description || '';
+      body.appendChild(descDiv);
+      if (t.notes) {
+        const notesDiv = document.createElement('div');
+        notesDiv.className = 'muted';
+        notesDiv.innerHTML = '<strong>Notas:</strong> ' + t.notes.replace(/</g,'&lt;');
+        body.appendChild(notesDiv);
+      }
+
+      item.append(header, body);
+      listEl.appendChild(item);
+    }
+  }
+  function button(text, onClick, cls='btn'){
+    const b = document.createElement('button');
+    b.className = cls; b.type='button'; b.textContent = text; b.addEventListener('click', onClick);
+    return b;
+  }
+  return { toast, clearForm, fillForm, renderList };
+})();
+
+/* =========================================================================================
+   APLICACIÓN: filtrado, eventos y lógica principal
+   ======================================================================================= */
+const app = (() => {
+  // Estado de filtros:
+  const state = {
+    filterDate: utils.todayISO(),
+  };
+
+  // ========== Inicialización ==========
+  function init(){
+    // Poner fechas por defecto (hoy) en formulario y filtro
+    document.getElementById('date').value = utils.todayISO();
+    document.getElementById('filterDate').value = state.filterDate;
+
+    // Eventos formulario
+    document.getElementById('taskForm').addEventListener('submit', onSave);
+    document.getElementById('resetBtn').addEventListener('click', (e)=> { e.preventDefault(); ui.clearForm(); });
+    document.getElementById('timerBtn').addEventListener('click', timer.toggle);
+
+    // Filtros
+    document.getElementById('filterDate').addEventListener('change', (e)=>{ state.filterDate = e.target.value; refreshList(); });
+        
+    // Acciones de barra
+    document.getElementById('exportJSONBtn').addEventListener('click', io.exportJSON);
+    document.getElementById('exportCSVBtn').addEventListener('click', io.exportCSV);
+            
+    // Atajos teclado
+    document.addEventListener('keydown', (e)=>{
+            if(e.key.toLowerCase() === 'n' && !e.ctrlKey && !e.metaKey){
+        if(document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA'){
+          e.preventDefault(); ui.clearForm();
+        }
+      }
+      if((e.ctrlKey || e.metaKey) && e.key === 'Enter'){
+        e.preventDefault(); document.getElementById('taskForm').requestSubmit();
+      }
+      if(e.key.toLowerCase() === 'f' && !e.ctrlKey && !e.metaKey){
+        const tag = document.activeElement.tagName;
+        const isEditing = ['INPUT','TEXTAREA','SELECT'].includes(tag);
+        if(isEditing) return; // no robar el foco si estás escribiendo
+        e.preventDefault();
+        document.getElementById('filterDate').focus();
+      }
+    });
+
+    refreshList();
+  }
+
+  // ========== Guardar / Editar ==========
+  function onSave(e){
+    e.preventDefault();
+    // Validaciones simples
+    const title = document.getElementById('title').value.trim();
+    if(!title){
+      ui.toast('El título es obligatorio.');
+      document.getElementById('title').focus();
+      return;
+    }
+    const minutes = parseInt(document.getElementById('minutes').value || '0', 10);
+    if(isNaN(minutes) || minutes < 0){
+      ui.toast('Minutos debe ser un entero ≥ 0.');
+      document.getElementById('minutes').focus();
+      return;
+    }
+
+    // Cerrar temporizador si seguía activo
+    timer.cancelIfRunning();
+
+    const id = document.getElementById('editingId').value || utils.uuid();
+    const nowISO = new Date().toISOString();
+
+    const task = {
+      id,
+      dateISO: document.getElementById('date').value || utils.todayISO(),
+      member: document.getElementById('member').value.trim(),
+      title,
+      description: document.getElementById('description').value.trim(),
+            minutes,
+      notes: document.getElementById('notes').value.trim(),
+      category: null,
+      startedAtISO: document.getElementById('startedAtISO').value || null,
+      endedAtISO: document.getElementById('endedAtISO').value || null,
+      completed: false,
+      createdAtISO: document.getElementById('editingId').value ? null : nowISO,
+      updatedAtISO: nowISO
+    };
+    // Si ya existía, conservar createdAtISO previo
+    const all = storage.getAll();
+    const prev = all.find(t => t.id === id);
+    if(prev
